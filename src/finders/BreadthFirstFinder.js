@@ -35,7 +35,8 @@ function BreadthFirstFinder(opt) {
  * @return {Array<Array<number>>} The path, including both start and
  *     end positions.
  */
-BreadthFirstFinder.prototype.findPath = function(startX, startY, endX, endY, grid) {
+BreadthFirstFinder.prototype.findPath = function(startX, startY, endX, endY, grid, recordPerf) {
+    recordPerf = recordPerf ? recordPerf : false;
     var openList = [],
         diagonalMovement = this.diagonalMovement,
         startNode = grid.getNodeAt(startX, startY),
@@ -46,6 +47,8 @@ BreadthFirstFinder.prototype.findPath = function(startX, startY, endX, endY, gri
     openList.push(startNode);
     startNode.opened = true;
 
+    var operations = 0;
+
     // while the queue is not empty
     while (openList.length) {
         // take the front node from the queue
@@ -54,11 +57,14 @@ BreadthFirstFinder.prototype.findPath = function(startX, startY, endX, endY, gri
 
         // reached the end position
         if (node === endNode) {
+            if(recordPerf) {
+              return { path: Util.backtrace(endNode), performance: { operations: operations } };
+            }
             return Util.backtrace(endNode);
         }
 
         neighbors = grid.getNeighbors(node, diagonalMovement);
-        for (i = 0, l = neighbors.length; i < l; ++i) {
+        for (i = 0, l = neighbors.length; i < l; ++i, ++operations) {
             neighbor = neighbors[i];
 
             // skip this neighbor if it has been inspected before
@@ -73,6 +79,9 @@ BreadthFirstFinder.prototype.findPath = function(startX, startY, endX, endY, gri
     }
     
     // fail to find the path
+    if(recordPerf) {
+      return { path: [], performance: { operations: operations }};
+    }
     return [];
 };
 
